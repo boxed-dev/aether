@@ -1,0 +1,32 @@
+{
+  "name": "aether-link",
+  "private": true,
+  "scripts": {
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "lint": "turbo lint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f",
+    "db:push": "pnpm --filter @aether-link/db db:push",
+    "db:generate": "pnpm --filter @aether-link/db db:generate",
+    "db:migrate": "pnpm --filter @aether-link/db db:migrate",
+    "setup": "pnpm docker:up && sleep 2 && pnpm db:push"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.1",
+    "@vitest/coverage-v8": "^2.1.8",
+    "turbo": "^2.3.3",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  },
+  "packageManager": "pnpm@9.15.1",
+  "engines": {
+    "node": ">=20"
+  }
+}
