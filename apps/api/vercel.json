@@ -1,5 +1,5 @@
 {
   "framework": "nextjs",
-  "installCommand": "cd ../.. && pnpm install",
-  "buildCommand": "cd ../.. && pnpm turbo build --filter=@aether-link/api"
+  "installCommand": "pnpm install --filter=@aether-link/api...",
+  "buildCommand": "pnpm turbo build --filter=@aether-link/api"
 }
