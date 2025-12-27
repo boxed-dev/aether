@@ -19,37 +19,32 @@ export function ProfileHeader({
   if (isLoading) {
     return (
       <div className={cn('flex flex-col items-center gap-4 animate-pulse', className)} {...props}>
-        <div className="h-28 w-28 rounded-full bg-gray-200" />
-        <div className="h-8 w-40 rounded-full bg-gray-200" />
-        <div className="h-4 w-64 rounded-full bg-gray-200" />
+        <div className="h-24 w-24 rounded-full bg-brand-border" />
+        <div className="h-6 w-32 rounded-full bg-brand-border" />
+        <div className="h-4 w-48 rounded-full bg-brand-border" />
       </div>
     );
   }
 
   return (
-    <div className={cn('flex flex-col items-center gap-8 text-center', className)} {...props}>
-      <div className="relative group">
-        <div className="absolute -inset-0.5 rounded-full bg-gradient-to-r from-brand-green/50 to-brand-green/20 blur opacity-75 group-hover:opacity-100 transition duration-500"></div>
+    <div className={cn('flex flex-col items-center gap-6 text-center', className)} {...props}>
+      <div className="relative">
         {avatarUrl ? (
           <img
             src={avatarUrl}
             alt={displayName}
-            className="relative h-32 w-32 rounded-full border-4 border-brand-dark object-cover"
+            className="h-24 w-24 rounded-full border-2 border-brand-border object-cover"
           />
         ) : (
-          <div className="relative flex h-32 w-32 items-center justify-center rounded-full border-4 border-brand-dark bg-brand-green text-5xl font-serif text-brand-dark">
+          <div className="flex h-24 w-24 items-center justify-center rounded-full border-2 border-brand-border bg-brand-accent text-3xl font-semibold text-white">
             {displayName.charAt(0).toUpperCase()}
           </div>
         )}
-        {/* Decorative asterisk */}
-        <div className="absolute -bottom-2 -right-2 text-brand-green text-4xl animate-spin-slow" aria-hidden="true">
-          ❋
-        </div>
       </div>
 
-      <div className="space-y-4 max-w-lg">
-        <h1 className="text-5xl font-serif text-brand-text tracking-tight italic">{displayName}</h1>
-        {bio && <p className="text-lg text-brand-muted font-sans font-light leading-relaxed">{bio}</p>}
+      <div className="space-y-2 max-w-md">
+        <h1 className="text-2xl font-semibold text-brand-text">{displayName}</h1>
+        {bio && <p className="text-brand-text-secondary leading-relaxed">{bio}</p>}
       </div>
     </div>
   );

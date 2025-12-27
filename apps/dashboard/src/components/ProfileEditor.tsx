@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { BentoCard } from '@aether-link/ui';
 import { useUpdateProfile, useCheckHandle } from '@/hooks/useProfile';
 import type { Profile } from '@/lib/api';
@@ -20,21 +20,25 @@ export function ProfileEditor({ profile }: ProfileEditorProps) {
   const updateProfile = useUpdateProfile();
   const checkHandle = useCheckHandle();
 
+  const checkHandleAvailability = useCallback(async (handleToCheck: string) => {
+    try {
+      const result = await checkHandle.mutateAsync(handleToCheck);
+      setHandleAvailable(result.available);
+    } catch {
+      setHandleAvailable(null);
+    }
+  }, [checkHandle]);
+
   useEffect(() => {
     if (handle !== profile.handle && handle.length >= 3) {
-      const timeout = setTimeout(async () => {
-        try {
-          const result = await checkHandle.mutateAsync(handle);
-          setHandleAvailable(result.available);
-        } catch {
-          setHandleAvailable(null);
-        }
+      const timeout = setTimeout(() => {
+        checkHandleAvailability(handle);
       }, 500);
       return () => clearTimeout(timeout);
     } else {
       setHandleAvailable(null);
     }
-  }, [handle, profile.handle, checkHandle]);
+  }, [handle, profile.handle, checkHandleAvailability]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,32 +63,36 @@ export function ProfileEditor({ profile }: ProfileEditorProps) {
 
   return (
     <BentoCard className="bg-brand-gray border-brand-border h-full">
-      <form onSubmit={handleSubmit} className="space-y-6 h-full flex flex-col">
-        <h2 className="text-xl font-bold text-white tracking-tight font-serif italic">Profile Settings</h2>
+      <form onSubmit={handleSubmit} className="space-y-5 h-full flex flex-col">
+        <h2 className="text-lg font-semibold text-brand-text">Profile Settings</h2>
 
         <div className="space-y-4 flex-1">
           <div>
-            <label htmlFor="displayName" className="block text-xs font-mono font-medium text-brand-muted mb-2 uppercase tracking-wider">Display Name</label>
+            <label htmlFor="displayName" className="block text-sm font-medium text-brand-text-secondary mb-2">
+              Display Name
+            </label>
             <input
               id="displayName"
               type="text"
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
-              className="w-full px-4 py-3 rounded-2xl bg-brand-dark border border-brand-border text-white focus:border-brand-green focus:ring-1 focus:ring-brand-green/50 focus:outline-none transition-all text-sm"
+              className="w-full px-4 py-2.5 rounded-xl bg-brand-dark border border-brand-border text-brand-text focus:border-brand-accent focus:ring-1 focus:ring-brand-accent/30 focus:outline-none transition-colors text-sm"
               required
             />
           </div>
 
           <div>
-            <label htmlFor="handle" className="block text-xs font-mono font-medium text-brand-muted mb-2 uppercase tracking-wider">Handle</label>
+            <label htmlFor="handle" className="block text-sm font-medium text-brand-text-secondary mb-2">
+              Handle
+            </label>
             <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-brand-muted font-mono text-sm" aria-hidden="true">@</span>
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-brand-muted text-sm">@</span>
               <input
                 id="handle"
                 type="text"
                 value={handle}
                 onChange={(e) => setHandle(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ''))}
-                className="w-full pl-8 pr-4 py-3 rounded-2xl bg-brand-dark border border-brand-border text-white focus:border-brand-green focus:ring-1 focus:ring-brand-green/50 focus:outline-none transition-all text-sm"
+                className="w-full pl-8 pr-4 py-2.5 rounded-xl bg-brand-dark border border-brand-border text-brand-text focus:border-brand-accent focus:ring-1 focus:ring-brand-accent/30 focus:outline-none transition-colors text-sm"
                 required
                 minLength={3}
                 maxLength={30}
@@ -92,53 +100,52 @@ export function ProfileEditor({ profile }: ProfileEditorProps) {
               />
             </div>
             {handle !== profile.handle && handleAvailable !== null && (
-              <p id="handle-status" className={`text-xs mt-2 font-mono ${handleAvailable ? 'text-brand-green' : 'text-red-500'}`} role="status">
-                {handleAvailable ? 'AVAILABLE' : 'TAKEN'}
+              <p id="handle-status" className={`text-xs mt-1.5 ${handleAvailable ? 'text-brand-success' : 'text-red-400'}`}>
+                {handleAvailable ? 'Available' : 'Already taken'}
               </p>
             )}
           </div>
 
           <div>
-            <label htmlFor="bio" className="block text-xs font-mono font-medium text-brand-muted mb-2 uppercase tracking-wider">Bio</label>
+            <label htmlFor="bio" className="block text-sm font-medium text-brand-text-secondary mb-2">
+              Bio
+            </label>
             <textarea
               id="bio"
               value={bio}
               onChange={(e) => setBio(e.target.value)}
-              className="w-full px-4 py-3 rounded-2xl bg-brand-dark border border-brand-border text-white focus:border-brand-green focus:ring-1 focus:ring-brand-green/50 focus:outline-none resize-none transition-all text-sm font-light"
+              className="w-full px-4 py-2.5 rounded-xl bg-brand-dark border border-brand-border text-brand-text focus:border-brand-accent focus:ring-1 focus:ring-brand-accent/30 focus:outline-none resize-none transition-colors text-sm"
               rows={3}
               maxLength={500}
               aria-describedby="bio-count"
             />
-            <p id="bio-count" className="text-[10px] text-brand-muted/50 mt-1 text-right font-mono">{bio.length}/500</p>
+            <p id="bio-count" className="text-xs text-brand-muted mt-1 text-right">{bio.length}/500</p>
           </div>
         </div>
 
-        <div className="flex items-center justify-between p-4 rounded-2xl bg-brand-dark border border-brand-border">
-          <span className="text-sm font-medium text-white">Public Profile</span>
+        <div className="flex items-center justify-between p-4 rounded-xl bg-brand-dark border border-brand-border">
+          <span className="text-sm text-brand-text">Public Profile</span>
           <button
             type="button"
             role="switch"
             aria-checked={isPublic}
             aria-label="Public profile"
             onClick={() => setIsPublic(!isPublic)}
-            className={`relative w-12 h-6 rounded-full transition-all duration-300 border border-transparent ${isPublic ? 'bg-brand-green/20 border-brand-green' : 'bg-brand-border'
-              }`}
+            className={`relative w-11 h-6 rounded-full transition-colors ${isPublic ? 'bg-brand-accent' : 'bg-brand-border'}`}
           >
             <span
-              className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full shadow-md transition-transform duration-300 ${isPublic ? 'translate-x-6 bg-brand-green' : 'bg-brand-muted'
-                }`}
-              aria-hidden="true"
+              className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${isPublic ? 'translate-x-5' : ''}`}
             />
           </button>
         </div>
 
-        <div className="flex flex-col gap-2 p-4 rounded-2xl bg-brand-purple/5 border border-brand-purple/20">
-          <span className="text-xs font-mono font-medium text-brand-muted uppercase tracking-widest">Your profile URL</span>
+        <div className="p-4 rounded-xl bg-brand-accent/10 border border-brand-accent/20">
+          <span className="text-xs font-medium text-brand-text-secondary block mb-1">Your profile URL</span>
           <a
             href={profileUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm font-semibold text-brand-purple hover:text-brand-purple/80 hover:underline truncate transition-colors"
+            className="text-sm text-brand-accent hover:text-brand-accent-hover truncate block transition-colors"
           >
             {profileUrl}
           </a>
@@ -147,9 +154,9 @@ export function ProfileEditor({ profile }: ProfileEditorProps) {
         <button
           type="submit"
           disabled={updateProfile.isPending || (handle !== profile.handle && !handleAvailable)}
-          className="w-full px-4 py-3 rounded-full bg-white text-brand-dark font-bold text-sm transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none"
+          className="w-full px-4 py-2.5 rounded-xl bg-brand-accent hover:bg-brand-accent-hover text-white font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {updateProfile.isPending ? 'SAVING...' : 'SAVE CHANGES'}
+          {updateProfile.isPending ? 'Saving...' : 'Save Changes'}
         </button>
       </form>
     </BentoCard>

@@ -35,7 +35,7 @@ function SortableLinkItem({ link, onDelete, onToggleActive }: SortableLinkItemPr
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.8 : 1,
+    opacity: isDragging ? 0.9 : 1,
     zIndex: isDragging ? 10 : 1,
   };
 
@@ -43,44 +43,43 @@ function SortableLinkItem({ link, onDelete, onToggleActive }: SortableLinkItemPr
     <div
       ref={setNodeRef}
       style={style}
-      className={`flex items-center gap-4 p-4 rounded-2xl border transition-all ${link.isActive
-          ? 'bg-brand-dark border-brand-border shadow-md'
-          : 'bg-brand-dark/40 border-transparent opacity-60 hover:opacity-100'
-        } ${isDragging ? 'shadow-2xl ring-2 ring-brand-green/30 scale-[1.02] bg-brand-gray' : ''}`}
+      className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${link.isActive
+        ? 'bg-brand-dark border-brand-border'
+        : 'bg-brand-dark/50 border-brand-border/50 opacity-60 hover:opacity-100'
+        } ${isDragging ? 'shadow-lg ring-1 ring-brand-accent/30' : ''}`}
     >
       <button
         {...attributes}
         {...listeners}
-        className="cursor-grab active:cursor-grabbing p-2 text-brand-muted hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+        className="cursor-grab active:cursor-grabbing p-1.5 text-brand-muted hover:text-brand-text rounded transition-colors"
         aria-label={`Drag to reorder ${link.title}`}
       >
-        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
         </svg>
       </button>
 
-      {link.icon && <span className="text-2xl flex-shrink-0 grayscale opacity-80">{link.icon}</span>}
+      {link.icon && <span className="text-lg shrink-0">{link.icon}</span>}
 
       <div className="flex-1 min-w-0">
-        <p className="font-semibold text-white truncate font-serif">{link.title}</p>
-        <p className="text-sm text-brand-muted truncate font-mono text-xs">{link.url}</p>
+        <p className="font-medium text-brand-text text-sm truncate">{link.title}</p>
+        <p className="text-xs text-brand-muted truncate">{link.url}</p>
       </div>
 
-      <div className="hidden sm:flex items-center gap-2 text-xs text-brand-muted font-medium bg-brand-gray/50 px-3 py-1.5 rounded-full border border-brand-border/30">
-        <span className="font-mono">{link.clickCount} clicks</span>
+      <div className="hidden sm:flex items-center text-xs text-brand-muted bg-brand-gray px-2 py-1 rounded">
+        {link.clickCount} clicks
       </div>
 
-      <div className="flex items-center gap-2 border-l border-brand-border/30 pl-4 ml-2">
+      <div className="flex items-center gap-1">
         <button
           onClick={() => onToggleActive(link.id, link.isActive)}
-          className={`p-2 rounded-full transition-all ${link.isActive
-              ? 'bg-brand-green/10 text-brand-green hover:bg-brand-green/20'
-              : 'bg-brand-gray text-brand-muted hover:bg-brand-gray/80 hover:text-white'
+          className={`p-1.5 rounded transition-colors ${link.isActive
+            ? 'bg-brand-success/10 text-brand-success hover:bg-brand-success/20'
+            : 'bg-brand-gray text-brand-muted hover:text-brand-text'
             }`}
           aria-label={link.isActive ? `Disable ${link.title}` : `Enable ${link.title}`}
-          aria-pressed={link.isActive}
         >
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             {link.isActive ? (
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
             ) : (
@@ -91,10 +90,10 @@ function SortableLinkItem({ link, onDelete, onToggleActive }: SortableLinkItemPr
 
         <button
           onClick={() => onDelete(link.id)}
-          className="p-2 rounded-full bg-red-500/5 text-red-500/70 hover:bg-red-500/10 hover:text-red-500 transition-colors"
+          className="p-1.5 rounded bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-colors"
           aria-label={`Delete ${link.title}`}
         >
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -139,7 +138,7 @@ export function SortableLinks({ profileId, links, onDelete, onToggleActive }: So
           linkIds: newOrder.map((l) => l.id),
         });
         toast.success('Links reordered');
-      } catch (error) {
+      } catch {
         toast.error('Failed to reorder links');
       }
     }
@@ -148,7 +147,7 @@ export function SortableLinks({ profileId, links, onDelete, onToggleActive }: So
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       <SortableContext items={links.map((l) => l.id)} strategy={verticalListSortingStrategy}>
-        <div className="space-y-3">
+        <div className="space-y-2">
           {links.map((link) => (
             <SortableLinkItem
               key={link.id}

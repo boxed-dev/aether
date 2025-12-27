@@ -3,14 +3,13 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../utils/cn';
 
 const glassCardVariants = cva(
-  'relative rounded-[24px] border border-glass-border transition-all duration-300 isolate overflow-hidden',
+  'relative rounded-2xl border transition-all duration-200',
   {
     variants: {
       variant: {
-        default: 'bg-glass-bg border-glass-border backdrop-blur-glass shadow-glass-card hover:bg-glass-bg/20',
-        elevated: 'bg-glass-bg/10 backdrop-blur-xl shadow-glass-hover border-glass-highlight',
-        solid: 'bg-white shadow-sm border-gray-100',
-        ghost: 'bg-transparent border-transparent hover:bg-glass-bg hover:shadow-glass-card',
+        default: 'bg-brand-gray border-brand-border',
+        elevated: 'bg-brand-surface border-brand-border shadow-medium',
+        ghost: 'bg-transparent border-transparent hover:bg-brand-gray hover:border-brand-border',
       },
       size: {
         sm: 'p-4',
@@ -19,7 +18,7 @@ const glassCardVariants = cva(
         xl: 'p-10',
       },
       interactive: {
-        true: 'cursor-pointer hover:-translate-y-1 hover:shadow-glass-hover active:scale-[0.99] active:translate-y-0 hover:border-glass-highlight transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-glass-highlight focus-visible:ring-offset-2',
+        true: 'cursor-pointer hover:border-brand-accent/50 hover:shadow-glass-hover active:scale-[0.99] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-offset-2 focus-visible:ring-offset-brand-dark',
         false: '',
       },
     },
@@ -61,14 +60,14 @@ export const GlassCard = forwardRef<HTMLDivElement, GlassCardProps>(
           ref={ref}
           className={cn(
             glassCardVariants({ variant, size, interactive: false }),
-            'border-red-200 bg-red-50/80',
+            'border-red-500/30 bg-red-500/10',
             className
           )}
           {...props}
         >
-          <div className="flex items-center gap-3 text-red-600">
+          <div className="flex items-center gap-3 text-red-400">
             <svg
-              className="h-5 w-5 flex-shrink-0"
+              className="h-5 w-5 shrink-0"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -98,8 +97,8 @@ export const GlassCard = forwardRef<HTMLDivElement, GlassCardProps>(
           {...props}
         >
           <div className="space-y-4">
-            <div className="h-4 w-3/4 rounded-full bg-gray-200" />
-            <div className="h-4 w-1/2 rounded-full bg-gray-200" />
+            <div className="h-4 w-3/4 rounded-full bg-brand-border" />
+            <div className="h-4 w-1/2 rounded-full bg-brand-border" />
           </div>
         </div>
       );
