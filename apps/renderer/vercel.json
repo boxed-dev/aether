@@ -1,7 +1,4 @@
 {
-  "version": 2,
-  "framework": "nextjs",
-  "buildCommand": "cd ../.. && pnpm turbo build --filter=@aether-link/renderer",
-  "installCommand": "pnpm install --frozen-lockfile",
-  "outputDirectory": ".next"
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs"
 }

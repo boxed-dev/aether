@@ -1,9 +1,6 @@
 {
-  "version": 2,
+  "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
-  "buildCommand": "cd ../.. && pnpm turbo build --filter=@aether-link/api",
-  "installCommand": "pnpm install --frozen-lockfile",
-  "outputDirectory": ".next",
   "headers": [
     {
       "source": "/api/(.*)",
