@@ -6,8 +6,7 @@
   "scripts": {
     "dev": "next dev -p 3002",
     "build": "next build",
-    "start": "next start -p 3002",
-    "lint": "next lint"
+    "start": "next start -p 3002"
   },
   "dependencies": {
     "@aether-link/core-logic": "workspace:*",
@@ -21,10 +20,13 @@
     "three": "^0.171.0"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.3",
     "@types/node": "^22.10.2",
     "@types/react": "^19.0.2",
     "@types/three": "^0.171.0",
     "autoprefixer": "^10.4.20",
+    "eslint": "^9.39.2",
+    "eslint-config-next": "^16.1.1",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.7.2"

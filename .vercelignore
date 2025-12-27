@@ -1,0 +1,54 @@
+# Dependencies
+node_modules
+
+# Build outputs
+dist
+.next/cache
+.turbo
+
+# Testing
+coverage
+tests
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+__tests__
+
+# Development
+.git
+.gitignore
+.env.local
+.env.*.local
+*.log
+
+# Documentation
+README.md
+CLAUDE.md
+gemini.md
+.gemini
+docs
+
+# Docker
+docker-compose.yml
+Dockerfile
+.dockerignore
+
+# CI/CD
+.github
+.gitlab-ci.yml
+
+# Editor
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Playwright
+playwright-report
+test-results

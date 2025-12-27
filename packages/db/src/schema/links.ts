@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, uuid, integer, boolean } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, uuid, integer, boolean, index } from 'drizzle-orm/pg-core';
 import { profiles } from './profiles';
 
 export const links = pgTable('links', {
@@ -14,7 +14,9 @@ export const links = pgTable('links', {
   clickCount: integer('click_count').notNull().default(0),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
-});
+}, (table) => ({
+  profileIdIdx: index('links_profile_id_idx').on(table.profileId),
+}));
 
 export type Link = typeof links.$inferSelect;
 export type NewLink = typeof links.$inferInsert;

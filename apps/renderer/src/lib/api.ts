@@ -1,29 +1,9 @@
+import type { Profile, Link } from '@aether-link/core-logic';
+
+// Re-export types for convenience
+export type { Profile, Link };
+
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
-
-export interface Profile {
-  id: string;
-  userId: string;
-  handle: string;
-  displayName: string;
-  bio: string | null;
-  avatarUrl: string | null;
-  isPublic: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface Link {
-  id: string;
-  profileId: string;
-  title: string;
-  url: string;
-  icon: string | null;
-  position: number;
-  isActive: boolean;
-  clickCount: number;
-  createdAt: string;
-  updatedAt: string;
-}
 
 export async function fetchProfileByHandle(handle: string): Promise<Profile> {
   const res = await fetch(`${API_BASE}/api/profiles/handle/${handle}`, {
@@ -53,7 +33,24 @@ export async function fetchLinksByProfileId(profileId: string): Promise<Link[]> 
 }
 
 export async function trackClick(linkId: string): Promise<void> {
-  await fetch(`${API_BASE}/api/links/${linkId}/click`, {
-    method: 'POST',
-  });
+  const url = `${API_BASE}/api/links/${linkId}/click`;
+
+  try {
+    if (typeof navigator !== 'undefined' && navigator.sendBeacon) {
+      const blob = new Blob(['{}'], { type: 'application/json' });
+      const success = navigator.sendBeacon(url, blob);
+
+      if (success) {
+        return;
+      }
+    }
+
+    await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      keepalive: true,
+    });
+  } catch (error) {
+    console.error('Failed to track click:', error);
+  }
 }

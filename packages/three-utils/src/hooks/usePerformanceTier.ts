@@ -28,9 +28,35 @@ export function usePerformanceTier(): PerformanceTierState {
     let mounted = true;
 
     const detect = async () => {
-      const hasWebGL = checkWebGLSupport();
+      try {
+        const hasWebGL = checkWebGLSupport();
 
-      if (!hasWebGL) {
+        if (!hasWebGL) {
+          if (mounted) {
+            setState({
+              tier: 'TIER_0',
+              config: getTierConfig('TIER_0'),
+              gpuInfo: null,
+              isLoading: false,
+              hasWebGL: false,
+            });
+          }
+          return;
+        }
+
+        const gpuInfo = await detectGPUTier();
+
+        if (mounted) {
+          setState({
+            tier: gpuInfo.tier,
+            config: getTierConfig(gpuInfo.tier),
+            gpuInfo,
+            isLoading: false,
+            hasWebGL: true,
+          });
+        }
+      } catch (error) {
+        console.warn('Performance tier detection failed, falling back to TIER_0:', error);
         if (mounted) {
           setState({
             tier: 'TIER_0',
@@ -40,19 +66,6 @@ export function usePerformanceTier(): PerformanceTierState {
             hasWebGL: false,
           });
         }
-        return;
-      }
-
-      const gpuInfo = await detectGPUTier();
-
-      if (mounted) {
-        setState({
-          tier: gpuInfo.tier,
-          config: getTierConfig(gpuInfo.tier),
-          gpuInfo,
-          isLoading: false,
-          hasWebGL: true,
-        });
       }
     };
 

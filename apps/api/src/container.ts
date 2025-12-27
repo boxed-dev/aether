@@ -45,7 +45,13 @@ export function getContainer(): Container {
       linkService: new LinkService(linkRepo, profileRepo),
     };
   } else {
-    const client = postgres(databaseUrl);
+    // Configure connection pool for production
+    const client = postgres(databaseUrl, {
+      max: 10, // Maximum pool size
+      idle_timeout: 20, // Idle connection timeout in seconds
+      connect_timeout: 10, // Connection timeout in seconds
+      max_lifetime: 60 * 30, // Maximum lifetime of connection in seconds (30 minutes)
+    });
     const db = drizzle(client);
 
     const userRepo = new PostgresUserRepository(db);

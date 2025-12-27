@@ -16,27 +16,33 @@ export async function detectGPUTier(): Promise<GPUInfo> {
     return { tier: 'TIER_0', gpu: undefined, isMobile: false, fps: undefined };
   }
 
-  if (!cachedTierResult) {
-    cachedTierResult = await getGPUTier();
+  try {
+    if (!cachedTierResult) {
+      cachedTierResult = await getGPUTier();
+    }
+
+    const result = cachedTierResult;
+    let tier: PerformanceTier;
+
+    if (result.tier === 0 || !result.gpu) {
+      tier = 'TIER_0';
+    } else if (result.tier <= 2 || result.isMobile) {
+      tier = 'TIER_1';
+    } else {
+      tier = 'TIER_2';
+    }
+
+    return {
+      tier,
+      gpu: result.gpu,
+      isMobile: result.isMobile ?? false,
+      fps: result.fps,
+    };
+  } catch (error) {
+    // Fallback to TIER_0 if GPU detection fails
+    console.warn('GPU tier detection failed, falling back to TIER_0:', error);
+    return { tier: 'TIER_0', gpu: undefined, isMobile: false, fps: undefined };
   }
-
-  const result = cachedTierResult;
-  let tier: PerformanceTier;
-
-  if (result.tier === 0 || !result.gpu) {
-    tier = 'TIER_0';
-  } else if (result.tier <= 2 || result.isMobile) {
-    tier = 'TIER_1';
-  } else {
-    tier = 'TIER_2';
-  }
-
-  return {
-    tier,
-    gpu: result.gpu,
-    isMobile: result.isMobile ?? false,
-    fps: result.fps,
-  };
 }
 
 export function checkWebGLSupport(): boolean {

@@ -34,7 +34,7 @@ export function ProfileEditor({ profile }: ProfileEditorProps) {
     } else {
       setHandleAvailable(null);
     }
-  }, [handle, profile.handle]);
+  }, [handle, profile.handle, checkHandle]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,7 +55,7 @@ export function ProfileEditor({ profile }: ProfileEditorProps) {
     }
   };
 
-  const profileUrl = `${typeof window !== 'undefined' ? window.location.origin.replace(':3000', ':3002') : ''}/${profile.handle}`;
+  const profileUrl = `${process.env.NEXT_PUBLIC_RENDERER_URL ?? 'http://localhost:3002'}/${profile.handle}`;
 
   return (
     <BentoCard className="bg-brand-gray border-brand-border h-full">

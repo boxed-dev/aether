@@ -33,12 +33,23 @@ export function usePhysicsTilt(options: UsePhysicsTiltOptions = {}) {
   }, [speed]);
 
   useEffect(() => {
-    if (disabled) return;
+    if (disabled) {
+      // Cancel any existing animation frame when disabled
+      if (frameRef.current !== undefined) {
+        cancelAnimationFrame(frameRef.current);
+        frameRef.current = undefined;
+      }
+      // Reset to default state
+      setTiltState(DEFAULT_STATE);
+      targetRef.current = DEFAULT_STATE;
+      return;
+    }
 
     frameRef.current = requestAnimationFrame(animate);
     return () => {
-      if (frameRef.current) {
+      if (frameRef.current !== undefined) {
         cancelAnimationFrame(frameRef.current);
+        frameRef.current = undefined;
       }
     };
   }, [animate, disabled]);

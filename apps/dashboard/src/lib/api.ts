@@ -1,58 +1,64 @@
+import type {
+  Profile,
+  Link,
+  CreateProfileInput,
+  UpdateProfileInput,
+  CreateLinkInput,
+  UpdateLinkInput,
+  HandleAvailabilityResponse,
+} from '@aether-link/core-logic';
+
+// Re-export types for convenience
+export type {
+  Profile,
+  Link,
+  CreateProfileInput,
+  UpdateProfileInput,
+  CreateLinkInput,
+  UpdateLinkInput,
+  HandleAvailabilityResponse,
+};
+
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
-export interface Profile {
-  id: string;
-  userId: string;
-  handle: string;
-  displayName: string;
-  bio: string | null;
-  avatarUrl: string | null;
-  isPublic: boolean;
-  createdAt: string;
-  updatedAt: string;
+/**
+ * Gets authentication token from cookies
+ * In NextAuth v5, the session token is stored in cookies and we need to pass it to the API
+ */
+async function getAuthHeaders(): Promise<HeadersInit> {
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+  };
+
+  // Get the session token from cookies
+  // NextAuth v5 stores the token in cookies, we'll use a helper to get it
+  if (typeof window !== 'undefined') {
+    const sessionToken = await getSessionToken();
+    if (sessionToken) {
+      headers['Authorization'] = `Bearer ${sessionToken}`;
+    }
+  }
+
+  return headers;
 }
 
-export interface Link {
-  id: string;
-  profileId: string;
-  title: string;
-  url: string;
-  icon: string | null;
-  position: number;
-  isActive: boolean;
-  clickCount: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface CreateProfileInput {
-  userId: string;
-  handle: string;
-  displayName: string;
-  bio?: string;
-  avatarUrl?: string;
-}
-
-export interface UpdateProfileInput {
-  handle?: string;
-  displayName?: string;
-  bio?: string | null;
-  avatarUrl?: string | null;
-  isPublic?: boolean;
-}
-
-export interface CreateLinkInput {
-  profileId: string;
-  title: string;
-  url: string;
-  icon?: string;
-}
-
-export interface UpdateLinkInput {
-  title?: string;
-  url?: string;
-  icon?: string | null;
-  isActive?: boolean;
+/**
+ * Gets the NextAuth session token from cookies
+ * This is used for client-side authentication
+ */
+async function getSessionToken(): Promise<string | null> {
+  try {
+    // For client-side, we need to get the JWT token that NextAuth stores
+    // We'll make a request to a helper endpoint that returns the token
+    const response = await fetch('/api/auth/session-token');
+    if (response.ok) {
+      const data = await response.json();
+      return data.token || null;
+    }
+  } catch {
+    // If we can't get the token, return null
+  }
+  return null;
 }
 
 async function handleResponse<T>(response: Response): Promise<T> {
@@ -81,16 +87,16 @@ export const api = {
         body: JSON.stringify(data),
       }).then(handleResponse<Profile>),
 
-    update: (id: string, data: UpdateProfileInput) =>
+    update: async (id: string, data: UpdateProfileInput) =>
       fetch(`${API_BASE}/api/profiles/${id}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: await getAuthHeaders(),
         body: JSON.stringify(data),
       }).then(handleResponse<Profile>),
 
     checkHandle: (handle: string) =>
       fetch(`${API_BASE}/api/profiles/check-handle?handle=${handle}`).then(
-        handleResponse<{ available: boolean }>
+        handleResponse<HandleAvailabilityResponse>
       ),
   },
 
@@ -98,27 +104,30 @@ export const api = {
     getByProfileId: (profileId: string) =>
       fetch(`${API_BASE}/api/links?profileId=${profileId}`).then(handleResponse<Link[]>),
 
-    create: (data: CreateLinkInput) =>
+    create: async (data: CreateLinkInput) =>
       fetch(`${API_BASE}/api/links`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: await getAuthHeaders(),
         body: JSON.stringify(data),
       }).then(handleResponse<Link>),
 
-    update: (id: string, data: UpdateLinkInput) =>
+    update: async (id: string, data: UpdateLinkInput) =>
       fetch(`${API_BASE}/api/links/${id}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: await getAuthHeaders(),
         body: JSON.stringify(data),
       }).then(handleResponse<Link>),
 
-    delete: (id: string) =>
-      fetch(`${API_BASE}/api/links/${id}`, { method: 'DELETE' }).then(handleResponse<void>),
+    delete: async (id: string) =>
+      fetch(`${API_BASE}/api/links/${id}`, {
+        method: 'DELETE',
+        headers: await getAuthHeaders(),
+      }).then(handleResponse<void>),
 
-    reorder: (profileId: string, linkIds: string[]) =>
+    reorder: async (profileId: string, linkIds: string[]) =>
       fetch(`${API_BASE}/api/links/reorder`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: await getAuthHeaders(),
         body: JSON.stringify({ profileId, linkIds }),
       }).then(handleResponse<void>),
   },

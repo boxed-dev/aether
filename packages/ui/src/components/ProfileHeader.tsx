@@ -42,7 +42,7 @@ export function ProfileHeader({
           </div>
         )}
         {/* Decorative asterisk */}
-        <div className="absolute -bottom-2 -right-2 text-brand-green text-4xl animate-spin-slow">
+        <div className="absolute -bottom-2 -right-2 text-brand-green text-4xl animate-spin-slow" aria-hidden="true">
           ❋
         </div>
       </div>

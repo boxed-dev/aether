@@ -19,7 +19,7 @@ const glassCardVariants = cva(
         xl: 'p-10',
       },
       interactive: {
-        true: 'cursor-pointer hover:-translate-y-1 hover:shadow-glass-hover active:scale-[0.99] active:translate-y-0 hover:border-glass-highlight transition-all duration-300',
+        true: 'cursor-pointer hover:-translate-y-1 hover:shadow-glass-hover active:scale-[0.99] active:translate-y-0 hover:border-glass-highlight transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-glass-highlight focus-visible:ring-offset-2',
         false: '',
       },
     },

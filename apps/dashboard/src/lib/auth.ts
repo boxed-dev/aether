@@ -21,8 +21,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const password = credentials.password as string;
 
         try {
-          // Call API to get user by email
-          const response = await fetch(`${API_BASE}/api/auth/user?email=${encodeURIComponent(email)}`);
+          // Call internal verify endpoint to get user with password hash
+          const response = await fetch(`${API_BASE}/api/auth/verify?email=${encodeURIComponent(email)}`);
 
           if (!response.ok) {
             return null;

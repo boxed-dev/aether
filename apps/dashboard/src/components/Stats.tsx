@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import { BentoCard } from '@aether-link/ui';
 import { useLinks } from '@/hooks/useLinks';
 
@@ -27,9 +28,12 @@ export function Stats({ profileId }: StatsProps) {
 
   const totalClicks = links.reduce((sum, link) => sum + link.clickCount, 0);
   const activeLinks = links.filter((link) => link.isActive).length;
-  const topLink = links.length > 0
-    ? links.reduce((top, link) => link.clickCount > top.clickCount ? link : top, links[0])
-    : null;
+
+  const topPerformingLinks = useMemo(() => {
+    return [...links]
+      .sort((a, b) => b.clickCount - a.clickCount)
+      .slice(0, 3);
+  }, [links]);
 
   return (
     <BentoCard className="overflow-hidden bg-brand-gray border-brand-border">
@@ -51,17 +55,14 @@ export function Stats({ profileId }: StatsProps) {
           </div>
         </div>
 
-        {links.length > 0 && (
+        {topPerformingLinks.length > 0 && (
           <div className="space-y-4">
             <h3 className="text-xs font-mono font-bold text-brand-muted/70 uppercase tracking-widest">Top Performing Links</h3>
             <div className="space-y-3">
-              {links
-                .sort((a, b) => b.clickCount - a.clickCount)
-                .slice(0, 3)
-                .map((link) => {
-                  const maxClicks = Math.max(...links.map((l) => l.clickCount));
-                  const percentage = maxClicks > 0 ? (link.clickCount / maxClicks) * 100 : 0;
-                  return (
+              {topPerformingLinks.map((link) => {
+                const maxClicks = Math.max(...links.map((l) => l.clickCount));
+                const percentage = maxClicks > 0 ? (link.clickCount / maxClicks) * 100 : 0;
+                return (
                     <div key={link.id} className="group">
                       <div className="flex justify-between text-sm font-medium mb-1">
                         <span className="truncate max-w-[200px] text-brand-text flex items-center gap-2 font-sans">

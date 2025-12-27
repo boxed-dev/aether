@@ -4,8 +4,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { api, type UpdateProfileInput } from '@/lib/api';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
-
 export function useProfile() {
   const { data: session } = useSession();
   const userId = session?.user?.id;
@@ -15,15 +13,12 @@ export function useProfile() {
     queryFn: async () => {
       if (!userId) return null;
       try {
-        const response = await fetch(
-          `${API_BASE}/api/profiles?userId=${userId}`
-        );
-        if (response.status === 404) return null;
-        if (!response.ok) throw new Error('Failed to fetch profile');
-        const data = await response.json();
-        return data || null;
-      } catch {
-        return null;
+        return await api.profiles.getByUserId(userId);
+      } catch (error) {
+        if (error instanceof Error && error.message.includes('404')) {
+          return null;
+        }
+        throw error;
       }
     },
     enabled: !!userId,

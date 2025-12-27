@@ -4,6 +4,7 @@ export type ErrorCode =
   | 'CONFLICT'
   | 'UNAUTHORIZED'
   | 'FORBIDDEN'
+  | 'RATE_LIMITED'
   | 'INTERNAL_ERROR'
   | 'NETWORK_ERROR'
   | 'TIMEOUT';

@@ -72,6 +72,111 @@ pnpm docker:down  # Stop PostgreSQL container
 - **Dependency Injection**: Easy swapping between real and mock implementations
 - **GPU-Tiered Rendering**: Automatic detection and fallback for different GPU capabilities
 
+## Deployment to Vercel
+
+This monorepo is configured for Vercel deployment. Each app (api, dashboard, renderer) can be deployed independently.
+
+### Prerequisites
+
+1. A Vercel account
+2. A PostgreSQL database (use Vercel Postgres, Supabase, Railway, or any PostgreSQL provider)
+3. Your codebase pushed to GitHub/GitLab/Bitbucket
+
+### Deployment Steps
+
+#### 1. Import Project to Vercel
+
+1. Go to [Vercel Dashboard](https://vercel.com/dashboard)
+2. Click "Add New..." -> "Project"
+3. Import your Git repository
+4. Vercel will auto-detect the monorepo structure
+
+#### 2. Deploy Each App Separately
+
+You need to create **3 separate projects** in Vercel (one for each app):
+
+**Project 1: API** (`@aether-link/api`)
+- **Root Directory**: `apps/api`
+- **Framework**: Next.js
+- **Build Command**: Uses `apps/api/vercel.json` (auto-detected)
+- **Install Command**: Uses `apps/api/vercel.json` (auto-detected)
+- **Environment Variables**:
+  ```
+  DATABASE_URL=postgresql://user:password@host:port/database
+  NODE_ENV=production
+  ```
+
+**Project 2: Dashboard** (`@aether-link/dashboard`)
+- **Root Directory**: `apps/dashboard`
+- **Framework**: Next.js
+- **Build Command**: Uses `apps/dashboard/vercel.json` (auto-detected)
+- **Install Command**: Uses `apps/dashboard/vercel.json` (auto-detected)
+- **Environment Variables**:
+  ```
+  NEXT_PUBLIC_API_URL=https://your-api-domain.vercel.app
+  NEXT_PUBLIC_RENDERER_URL=https://your-renderer-domain.vercel.app
+  AUTH_SECRET=<generate-with-openssl-rand-base64-32>
+  NODE_ENV=production
+  ```
+
+**Project 3: Renderer** (`@aether-link/renderer`)
+- **Root Directory**: `apps/renderer`
+- **Framework**: Next.js
+- **Build Command**: Uses `apps/renderer/vercel.json` (auto-detected)
+- **Install Command**: Uses `apps/renderer/vercel.json` (auto-detected)
+- **Environment Variables**:
+  ```
+  NEXT_PUBLIC_API_URL=https://your-api-domain.vercel.app
+  NEXT_PUBLIC_RENDERER_URL=https://your-renderer-domain.vercel.app
+  NODE_ENV=production
+  ```
+
+#### 3. Configure Database
+
+After deploying the API:
+
+```bash
+# Set DATABASE_URL in Vercel project settings
+# Then run migrations (from your local machine):
+DATABASE_URL=<your-production-db-url> pnpm db:push
+```
+
+#### 4. Update CORS Settings (if needed)
+
+If your dashboard and renderer are on different domains than the API, update the API's CORS middleware to allow those origins.
+
+### Environment Variables
+
+Generate a secure `AUTH_SECRET`:
+```bash
+openssl rand -base64 32
+```
+
+Use the **same** `AUTH_SECRET` value for both API and Dashboard.
+
+### Custom Domains (Optional)
+
+In each Vercel project settings, you can add custom domains:
+- API: `api.yourdomain.com`
+- Dashboard: `dashboard.yourdomain.com` or `admin.yourdomain.com`
+- Renderer: `yourdomain.com` or `links.yourdomain.com`
+
+### Troubleshooting
+
+**Build fails with "Cannot find module":**
+- Ensure all workspace dependencies are properly linked in `package.json`
+- Vercel runs `pnpm install --frozen-lockfile` which installs all dependencies
+
+**Database connection fails:**
+- Verify `DATABASE_URL` is set correctly in Vercel environment variables
+- Ensure database allows connections from Vercel's IP ranges
+- For Vercel Postgres, use the connection string from their dashboard
+
+**Large bundle size warning:**
+- The renderer app includes Three.js which is large but necessary
+- Code splitting is configured to optimize the bundle
+- The API uses standalone output to minimize serverless function size
+
 ## License
 
 MIT

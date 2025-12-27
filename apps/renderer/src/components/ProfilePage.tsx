@@ -1,19 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { ProfileHeader, LinkCard, GlassCard, cn } from '@aether-link/ui'; // Import cn from ui package
-// Wait, I see @aether-link/ui usually exports cn? Or use local.
-// Let's check where cn is. In the package it is in utils/cn. In apps/renderer it might be different.
-// I'll assume standard Shadcn-like structure for apps or use the package one if exported.
-// Actually, earlier I saw `apps/renderer/src/lib/api`. I'll try to find `cn`.
-// For now, I'll just import it from the UI package if possible, or use the one in `lib/utils` if it exists.
-// Let's look at the file explorer from earlier.
-// `apps/renderer/src` has `components` and `app`.
-// I will check for `lib/utils` or `utils/cn`.
-// I will start by guessing it's in `@aether-link/ui` since I saw it there.
-// But `apps/renderer` might not have direct access to internal utils of `ui` package unless exported.
-// I will check exports of `@aether-link/ui`.
-
+import { ProfileHeader, LinkCard, GlassCard, cn } from '@aether-link/ui';
 import { usePerformanceTier, usePhysicsTilt } from '@aether-link/three-utils';
 import { fetchLinksByProfileId, trackClick, type Profile, type Link } from '@/lib/api';
 
@@ -34,12 +22,13 @@ function TiltableLinkCard({ link }: { link: Link }) {
   };
 
   return (
-    <div style={getTransformStyle()} {...handlers}>
+    <div style={getTransformStyle()} {...handlers} className="h-full">
       <LinkCard
         title={link.title}
         href={link.url}
         icon={link.icon ?? undefined}
         onClick={handleClick}
+        className="h-full"
       />
     </div>
   );
@@ -67,12 +56,18 @@ export function ProfilePage({ profile }: ProfilePageProps) {
         </header>
 
         {/* Links Grid - Bento Layout */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-4 auto-rows-[160px]">
           {isLoading ? (
             <>
-              <LinkCard title="" href="#" isLoading className="h-40" />
-              <LinkCard title="" href="#" isLoading className="h-40" />
-              <LinkCard title="" href="#" isLoading className="h-40" />
+              <div className="md:col-span-2 lg:col-span-3 md:row-span-2">
+                <LinkCard title="" href="#" isLoading className="h-full" />
+              </div>
+              <div className="md:col-span-2 lg:col-span-3">
+                <LinkCard title="" href="#" isLoading className="h-full" />
+              </div>
+              <div className="md:col-span-2 lg:col-span-3">
+                <LinkCard title="" href="#" isLoading className="h-full" />
+              </div>
             </>
           ) : error ? (
             <div className="col-span-full">
@@ -85,23 +80,31 @@ export function ProfilePage({ profile }: ProfilePageProps) {
               </GlassCard>
             </div>
           ) : (
-            activeLinks.map((link, index) => (
-              <div
-                key={link.id}
-                className={cn(
-                  "transform transition-all duration-500 hover:z-10",
-                  /* First item spans 2 cols on tablet+, 2nd item is tall, etc. - Pseudo Bento Logic */
-                  index === 0 ? "md:col-span-2 lg:col-span-2 aspect-[2/1]" : "aspect-square md:aspect-auto md:h-full"
-                )}
-              >
-                <LinkCard
-                  title={link.title}
-                  href={link.url}
-                  icon={link.icon ?? undefined}
-                  className="h-full w-full"
-                />
-              </div>
-            ))
+            activeLinks.map((link, index) => {
+              const getBentoClass = (idx: number) => {
+                const patterns = [
+                  'md:col-span-2 lg:col-span-3 md:row-span-2',
+                  'md:col-span-2 lg:col-span-3',
+                  'md:col-span-2 lg:col-span-2',
+                  'md:col-span-2 lg:col-span-4 md:row-span-2',
+                  'md:col-span-2 lg:col-span-2',
+                  'md:col-span-2 lg:col-span-3',
+                ];
+                return patterns[idx % patterns.length];
+              };
+
+              return (
+                <div
+                  key={link.id}
+                  className={cn(
+                    'transform transition-all duration-300 hover:scale-[1.02] hover:z-10',
+                    getBentoClass(index)
+                  )}
+                >
+                  <TiltableLinkCard link={link} />
+                </div>
+              );
+            })
           )}
         </div>
 

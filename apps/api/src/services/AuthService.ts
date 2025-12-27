@@ -9,11 +9,12 @@ const registerSchema = z.object({
 });
 
 export type RegisterInput = z.infer<typeof registerSchema>;
+export type SafeUser = Omit<User, 'passwordHash'>;
 
 export class AuthService {
   constructor(private userRepo: IUserRepository) {}
 
-  async register(input: RegisterInput): Promise<Result<Omit<User, 'passwordHash'>>> {
+  async register(input: RegisterInput): Promise<Result<SafeUser>> {
     const validation = registerSchema.safeParse(input);
     if (!validation.success) {
       return fail('VALIDATION_ERROR', 'Invalid registration data', {
@@ -39,11 +40,25 @@ export class AuthService {
     return ok(userWithoutPassword);
   }
 
-  async getUserByEmail(email: string): Promise<Result<User | null>> {
-    return this.userRepo.findByEmail(email);
+  async getUserByEmail(email: string): Promise<Result<SafeUser | null>> {
+    const result = await this.userRepo.findByEmail(email);
+    if (!isOk(result)) return result;
+    if (!result.data) return ok(null);
+
+    const { passwordHash: _, ...safeUser } = result.data;
+    return ok(safeUser);
   }
 
-  async getUserById(id: string): Promise<Result<User | null>> {
-    return this.userRepo.findById(id);
+  async getUserById(id: string): Promise<Result<SafeUser | null>> {
+    const result = await this.userRepo.findById(id);
+    if (!isOk(result)) return result;
+    if (!result.data) return ok(null);
+
+    const { passwordHash: _, ...safeUser } = result.data;
+    return ok(safeUser);
+  }
+
+  async getUserByEmailWithPassword(email: string): Promise<Result<User | null>> {
+    return this.userRepo.findByEmail(email);
   }
 }

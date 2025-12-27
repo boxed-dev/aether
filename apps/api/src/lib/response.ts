@@ -7,6 +7,7 @@ const HTTP_STATUS_MAP: Record<ErrorCode, number> = {
   FORBIDDEN: 403,
   NOT_FOUND: 404,
   CONFLICT: 409,
+  RATE_LIMITED: 429,
   INTERNAL_ERROR: 500,
   NETWORK_ERROR: 502,
   TIMEOUT: 504,
@@ -23,6 +24,13 @@ export function toResponse<T>(result: Result<T>, successStatus = 200): NextRespo
   const status = HTTP_STATUS_MAP[result.error.code] ?? 500;
   const isProduction = process.env.NODE_ENV === 'production';
 
+  const headers: HeadersInit = {};
+
+  // Add Retry-After header for rate limiting
+  if (result.error.code === 'RATE_LIMITED' && result.error.details?.retryAfter) {
+    headers['Retry-After'] = String(result.error.details.retryAfter);
+  }
+
   return NextResponse.json(
     {
       error: {
@@ -31,7 +39,7 @@ export function toResponse<T>(result: Result<T>, successStatus = 200): NextRespo
         ...(isProduction ? {} : { details: result.error.details }),
       },
     },
-    { status }
+    { status, headers }
   );
 }
 

@@ -11,13 +11,44 @@ export async function generateMetadata({ params }: PageProps) {
 
   try {
     const profile = await fetchProfileByHandle(handle);
+    const title = `${profile.displayName} | Aether Link`;
+    const description = profile.bio ?? `Check out ${profile.displayName}'s links`;
+    const url = `${process.env.NEXT_PUBLIC_RENDERER_URL ?? 'https://aetherlink.app'}/${handle}`;
+
     return {
-      title: `${profile.displayName} | Aether Link`,
-      description: profile.bio ?? `Check out ${profile.displayName}'s links`,
+      title,
+      description,
+      openGraph: {
+        title,
+        description,
+        url,
+        siteName: 'Aether Link',
+        type: 'profile',
+        images: profile.avatarUrl
+          ? [
+              {
+                url: profile.avatarUrl,
+                width: 400,
+                height: 400,
+                alt: `${profile.displayName}'s avatar`,
+              },
+            ]
+          : [],
+      },
+      twitter: {
+        card: 'summary',
+        title,
+        description,
+        images: profile.avatarUrl ? [profile.avatarUrl] : [],
+      },
+      alternates: {
+        canonical: url,
+      },
     };
   } catch {
     return {
       title: 'Not Found | Aether Link',
+      description: 'Profile not found',
     };
   }
 }

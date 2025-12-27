@@ -33,6 +33,7 @@ export const LinkCard = forwardRef<HTMLAnchorElement, LinkCardProps>(
           'group relative flex items-center justify-between overflow-hidden rounded-[24px] bg-brand-gray border border-brand-border p-5',
           'transition-all duration-300 ease-out',
           'hover:border-brand-green hover:-translate-y-1 hover:shadow-[0_4px_20px_-8px_rgba(0,223,93,0.3)]',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-green focus-visible:ring-offset-2 focus-visible:ring-offset-brand-dark',
           'active:scale-[0.98]',
           className
         )}
@@ -52,7 +53,13 @@ export const LinkCard = forwardRef<HTMLAnchorElement, LinkCardProps>(
           <div className="flex flex-col gap-0.5">
             <span className="font-sans text-lg font-semibold text-brand-text group-hover:text-brand-green transition-colors">{title}</span>
             <span className="font-sans text-xs text-brand-muted font-medium uppercase tracking-wider">
-              {href ? new URL(href, 'http://example.com').hostname.replace('www.', '') : ''}
+              {href ? (() => {
+                try {
+                  return new URL(href, 'http://example.com').hostname.replace('www.', '');
+                } catch {
+                  return href.replace(/^https?:\/\//, '').replace('www.', '').split('/')[0];
+                }
+              })() : ''}
             </span>
           </div>
         </div>
